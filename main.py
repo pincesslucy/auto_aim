@@ -6,7 +6,7 @@ from mss import mss
 import keyboard
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from transparentwindow import TransparentWindow
 from test import MyWindow
 import time
@@ -34,6 +34,7 @@ class Worker(QThread):
         self.pose = self.mp_pose_detection.Pose()
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
+        self.num = 50
     def find_body(self, landmarks):
         x = []
         y = []
@@ -62,7 +63,7 @@ class Worker(QThread):
                 body_x, body_y, body_w, body_h = self.find_body(results.pose_landmarks.landmark)
                 body_pt = [body_x, body_y, body_w, body_h]
                 
-                self.num = 50
+                
                 self.timeout.emit(self.num)
 
                 pag.moveTo(nose_x, nose_y)
@@ -79,7 +80,7 @@ class MyWindow(QMainWindow, QWidget):
         self.initUI()
         self.worker = Worker(screenWidth, screenHeight)
         self.worker.start()
-        # self.worker.timeout.connect(self.timeout)
+        self.worker.timeout.connect(self.timeout)
 
     def initUI(self):
             self.setAttribute(Qt.WA_TranslucentBackground, True)  # 배경 투명하게 설정
@@ -93,9 +94,9 @@ class MyWindow(QMainWindow, QWidget):
             # self.timer.timeout.connect(self.update)  # 타이머 시간이 다 되면 update() 메서드 호출
             # self.timer.start()  # 타이머 시작
 
-    # @pyqtSlot(int)
-    # def timeout(self, num):
-    #     print(num)
+    @pyqtSlot(int)
+    def timeout(self, num):
+        print(num)
 
     def paintEvent(self, event):
     
