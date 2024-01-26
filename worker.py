@@ -22,7 +22,7 @@ class Worker(QThread):
         for i in range(0, 33):
             x.append(landmarks[i].x)
             y.append(landmarks[i].y)
-        return min(x)*self.screenWidth, min(y)*self.screenHeight-60, (max(x)-min(x))*self.screenWidth, ((max(y)-min(y))*self.screenHeight+60)
+        return min(x)*self.screenWidth, min(y)*self.screenHeight-60, (max(x)-min(x))*self.screenWidth, ((max(y)-min(y))*self.screenHeight)+60
 
     def run(self):
         while True:
