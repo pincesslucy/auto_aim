@@ -26,10 +26,10 @@ class TransparentWindow(QWidget):
         painter.setPen(pen)  # 펜 설정
         painter.drawRect(self.x, self.y, self.w, self.h)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
 
-    window = TransparentWindow(1920, 1080, 100, 100, 200, 200)
-    window.show()
+#     window = TransparentWindow(1920, 1080, 100, 100, 200, 200)
+#     window.show()
 
-    sys.exit(app.exec_())
+#     sys.exit(app.exec_())
