@@ -8,3 +8,11 @@ pip install -r requirements.txt
 python main.py
 ```
 종료 시 : q 입력
+
+# Example
+![KakaoTalk_20240315_193703298](https://github.com/pincesslucy/auto_aim/assets/98650288/c745798f-2d60-4a78-bede-749f2caaa4bc)
+
+
+# Update
+- 객체감지모델 mediapipe -> yolo v8로 수정
+- 마우스 point 이동 업데이트 예정
