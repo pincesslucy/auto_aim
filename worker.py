@@ -1,28 +1,41 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import cv2
 import numpy as np
-import mediapipe as mp
 import pyautogui as pag
 from mss import mss
 import keyboard
+from ultralytics import YOLO
+import torch
 
 
 class Worker(QThread):
     timeout = pyqtSignal(list)
+   
     def __init__(self, screenWidth, screenHeight):
         super().__init__()
-        self.mp_pose_detection = mp.solutions.pose
-        self.pose = self.mp_pose_detection.Pose()
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
         self.num = 50
-    def find_body(self, landmarks):
-        x = []
-        y = []
-        for i in range(0, 33):
-            x.append(landmarks[i].x)
-            y.append(landmarks[i].y)
-        return min(x)*self.screenWidth, min(y)*self.screenHeight-60, (max(x)-min(x))*self.screenWidth, ((max(y)-min(y))*self.screenHeight)+60
+        self.model = YOLO("yolov8m-pose.pt")
+
+    def predict(self, frame, iou=0.7, conf=0.25):
+        results = self.model(
+            source=frame,
+            device= "cuda:0" if torch.cuda.is_available() else "cpu",
+            iou=iou,
+            conf=conf,
+            verbose=False,
+        )
+        result = results[0]
+        return result
+
+    def get_boxes(self, frame, result):
+        bboxes = []
+        for boxes in result.boxes:
+            x1, y1, x2, y2, score, classes = boxes.data.squeeze().cpu().numpy()
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+            bboxes.append((x1, y1, x2, y2))
+        return bboxes
 
     def run(self):
         while True:
@@ -31,24 +44,10 @@ class Worker(QThread):
 
             screenshot = sct.grab(sct.monitors[0])  # 화면 캡처
             image = np.array(screenshot)
-
-            image_ = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            results = self.pose.process(image_)
-
-            if results.pose_landmarks:
-                mp.solutions.drawing_utils.draw_landmarks(image_, results.pose_landmarks, self.mp_pose_detection.POSE_CONNECTIONS)
-                nose = results.pose_landmarks.landmark[self.mp_pose_detection.PoseLandmark.NOSE]
-
-                nose_x = int(nose.x * image.shape[1])
-                nose_y = int(nose.y * image.shape[0])
-
-                body_x, body_y, body_w, body_h = self.find_body(results.pose_landmarks.landmark)
-                body_pt = [body_x, body_y, body_w, body_h]
-
-                self.timeout.emit(body_pt)
-
-                pag.moveTo(nose_x, nose_y)
-                pag.FAILSAFE = False
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            result = self.predict(image)
+            bbox = self.get_boxes(image, result)
+            self.timeout.emit(bbox)
 
         #cv2.imshow('MediaPipe Pose', image)
             if keyboard.is_pressed('q'):

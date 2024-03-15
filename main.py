@@ -1,6 +1,5 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import  pyqtSlot
 from window import MyWindow
 
 from PyQt5.QtWidgets import QApplication
