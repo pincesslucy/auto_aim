@@ -15,4 +15,4 @@ python main.py
 
 # Update
 - 객체감지모델 mediapipe -> yolo v8로 수정
-- 마우스 point 이동 업데이트 예정
+- ~~마우스 point 이동 업데이트 예정~~
